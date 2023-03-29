@@ -1,6 +1,9 @@
 import sqlite3
+import os
 
 # Bakkal sınıfı tanımlanıyor
+# TODO ürün listeleme özelliğine şekillendirme yapılacak
+
 class Bakkal:
     # Veritabanı adı alınarak bir bağlantı oluşturuluyor ve cursor oluşturuluyor
     # Eğer "urunler" tablosu yoksa oluşturuluyor
@@ -71,7 +74,24 @@ class Bakkal:
             print("Mevcut ürünler:")
             for urun in urunler:
                 print(
-                    f" Ürün Adı: {urun[0]}\n Fiyat: {urun[1]}TL\n Stok Adeti: {urun[2]}")
+                    f" Ürün Adı: {urun[0]}\n Fiyat: {urun[1]} TL\n Stok Adeti: {urun[2]}\n")
+
+    def fiyat_guncelle(self, urun_ad, yeni_fiyat):
+        # Veritabanında ilgili ürünün fiyatını güncellemek için SQL sorgusu oluşturuluyor
+        self.cursor.execute(
+            "UPDATE urunler SET fiyat=? WHERE urun_ad=?", (yeni_fiyat, urun_ad))
+        # Kullanıcıya güncelleme işleminin tamamlandığına dair bir mesaj gösterilir
+        print(f"{urun_ad} ürününün fiyatı {yeni_fiyat} olarak güncellendi.")
+        # Yapılan güncelleme işleminin veritabanına yansıması için işlem tamamlanır
+        self.conn.commit()
+
+    def konsol_temizle(self):
+        # Windows işletim sistemi için
+        if os.name == 'nt':
+            os.system('cls')
+        # Mac/Linux işletim sistemleri için
+        else:
+            os.system('clear')
 
     def __del__(self):
         self.cursor.close()
@@ -80,6 +100,7 @@ class Bakkal:
 
 if __name__ == '__main__':
     bakkalim = Bakkal("bakkal.db")
+    bakkalim.konsol_temizle()
     while True:
         print(
             """
@@ -88,7 +109,8 @@ if __name__ == '__main__':
             2 - Ürün sil
             3 - Stok ekle
             4 - Stok güncelle
-            5 - Ürünleri Listele
+            5 - Fiyat güncelle
+            6 - Ürünleri Listele
             0 - Çıkış yap
             """
         )
@@ -98,21 +120,31 @@ if __name__ == '__main__':
             fiyat = float(input(f"{urun_ad} ürününün fiyatı: "))
             stok_adet = int(
                 input(f"{urun_ad} ürününden kaç adet eklemek istiyorsunuz: "))
+            bakkalim.konsol_temizle()
             bakkalim.urun_ekle(urun_ad, fiyat, stok_adet)
         elif islem == "2":
             urun_ad = input("Silmek istediğiniz ürünün adı: ")
+            bakkalim.konsol_temizle()
             bakkalim.urun_sil(urun_ad)
         elif islem == "3":
             urun_ad = input("Stok eklemek istediğiniz ürünün adı: ")
             eklenecek_stok = int(
                 input(f"{urun_ad} ürününe kaç adet stok eklemek istiyorsunuz: "))
+            bakkalim.konsol_temizle()
             bakkalim.stok_ekle(urun_ad, eklenecek_stok)
         elif islem == "4":
             urun_ad = input("Güncellemek istediğiniz ürünün adı: ")
             yeni_stok_miktari = int(
                 input(f"{urun_ad} ürününün yeni stok miktarı: "))
+            bakkalim.konsol_temizle()
             bakkalim.stok_guncelle(urun_ad, yeni_stok_miktari)
         elif islem == "5":
+            urun_ad = input("Güncellemek istediğiniz ürünün adı: ")
+            urun_fiyat = input("Güncellemek istediğiniz ürünün yeni fiyatı: ")
+            bakkalim.konsol_temizle()
+            bakkalim.fiyat_guncelle(urun_ad, urun_fiyat)
+        elif islem == "6":
+            bakkalim.konsol_temizle()
             bakkalim.urunleri_listele()
         elif islem == "0":
             print("Program kapatılıyor...")
